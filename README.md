@@ -1,88 +1,123 @@
 # 🧘 Skeleton-Based Fall Detection System
 
-[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/release/python-390/)
-[![PySide6](https://img.shields.io/badge/UI-PySide6-green.svg)](https://pypi.org/project/PySide6/)
-[![MediaPipe](https://img.shields.io/badge/AI-MediaPipe-orange.svg)](https://mediapipe.dev/)
+<div align="center">
+  <p align="center">
+    <b>Real-time human pose estimation and automated fall classification using MediaPipe and Machine Learning.</b>
+  </p>
+  <p align="center">
+    <img src="https://img.shields.io/badge/Python-3.9+-blue.svg?style=for-the-badge&logo=python&logoColor=white" alt="Python" />
+    <img src="https://img.shields.io/badge/MediaPipe-0.8+-orange.svg?style=for-the-badge&logo=google&logoColor=white" alt="MediaPipe" />
+    <img src="https://img.shields.io/badge/PySide6-Qt-green.svg?style=for-the-badge&logo=qt&logoColor=white" alt="PySide6" />
+    <img src="https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge" alt="License" />
+  </p>
+</div>
 
-A sophisticated, real-time fall detection system leveraging **MediaPipe Pose Estimation** and **Machine Learning (Random Forest)**. Designed for healthcare monitoring and elderly care, this application provides synchronous skeleton visualization and automated alert logging.
+---
+
+## 📖 Overview
+
+The **Skeleton-Based Fall Detection System** is a modular desktop application designed for healthcare monitoring and elderly care. By leveraging **MediaPipe Pose Estimation**, the system extracts 3D skeletal landmarks in real-time and utilizes a **Random Forest Classifier** to detect sudden falls with high accuracy.
+
+Unlike traditional camera-based systems that rely on raw pixels, this system uses **skeleton-based features**, ensuring privacy (by not storing raw video) and robustness against varied lighting conditions or complex backgrounds.
 
 ---
 
 ## ✨ Key Features
 
--   **🎥 Dual-Mode Processing**: Seamlessly switch between live Webcam monitoring and offline Video File analysis.
--   **🦴 Real-time Pose Mesh**: High-fidelity 33-point skeleton overlay powered by MediaPipe.
--   **🤖 Intelligent Classification**: Binary fall detection using a Random Forest classifier trained on custom movement features.
--   **📊 Feature Engineering**: Extracts critical metrics like vertical velocity, joint angles (knees, hips), and torso orientation.
--   **💻 Modern Desktop UI**: A sleek, dark-themed interface built with **PySide6** (Qt) featuring:
-    -   Live video canvas with minimal latency.
-    -   Real-time "System Status" and "Fall Status" indicators.
-    -   Persistent Event Log with timestamps.
+- **🎥 Dual Input Support**:
+  - **Live Stream**: Real-time monitoring via system webcam.
+  - **Video Analysis**: Process pre-recorded files (`.mp4`, `.avi`, etc.).
+- **🦴 33-Point Pose Mesh**: High-fidelity skeleton mapping and visualization.
+- **🤖 Intelligent Classification**:
+  - Binary Fall/No-Fall detection.
+  - Automated threshold-based alerts.
+  - Synthetic model auto-generation for quick deployment.
+- **📊 Advanced Feature Engineering**:
+  - **Vertical Velocity**: Tracking sudden Y-axis acceleration of landmarks.
+  - **Body Aspect Ratio (BAR)**: Analyzing torso-to-limb ratios for orientation shifts.
+  - **Ground Proximity Index**: Real-time distance calculation from frame boundaries.
+- **💻 Premium Desktop Interface**:
+  - Dark-themed, high-performance UI built with **PySide6**.
+  - Non-blocking multi-threaded processing for zero-latency feedback.
+  - Real-time diagnostic logs and system status indicators.
 
 ---
 
-## 🛠️ Getting Started
+## 🛠️ Project Structure
+
+```text
+Skeleton-based-fall-detection/
+├── 📂 gui/                # UI Components & Threading
+│   ├── main_window.py     # Main application layout
+│   └── video_thread.py    # Non-blocking processing logic
+├── 📂 vision/             # Computer Vision Wrappers
+│   ├── pose_detector.py   # MediaPipe integration
+│   └── camera_check.py    # Hardware diagnostics
+├── 📂 ml/                 # Machine Learning Pipeline
+│   ├── inference.py       # Model prediction logic
+│   ├── generate_model.py  # Synthetic data & model training
+│   └── model.pkl          # Serialized classifier
+├── 📂 utils/              # Mathematical Utilities
+│   └── feature_extraction.py # Pose-to-feature conversion
+├── 📂 logs/               # Automated Session Logs
+├── 📄 main.py             # System Application Entry
+├── 📄 requirements.txt    # Dependency Manifest
+├── 📄 run_app.bat         # Windows Quick-Launch Script
+└── 📄 LICENSE             # MIT License
+```
+
+---
+
+## 🚀 Getting Started
 
 ### 1. Prerequisites
-
--   **Python 3.9 or higher**
--   A stable internet connection (for initial MediaPipe model download)
--   A webcam (optional, for live mode)
+- **Python 3.9+** (Tested on Windows/Linux)
+- A webcam (for Live Mode)
+- `pip` package manager
 
 ### 2. Installation
-
-Clone the repository and install the dependencies:
+Clone the repository and install the core dependencies:
 
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR_USERNAME/MINI_PROJECT_3.git
-cd MINI_PROJECT_3
+git clone https://github.com/3447-OFFICIAL/Skeleton-based-real-time-fall-detection.git
 
-# Install dependencies
-pip install PySide6 opencv-python mediapipe numpy scikit-learn pandas
+# Navigate to project root
+cd Skeleton-based-real-time-fall-detection
+
+# Install required packages
+pip install -r requirements.txt
 ```
 
-### 3. Running the Application
+### 3. Launching the App
+#### Windows (Quickest)
+Simply double-click the `run_app.bat` file in the root directory.
 
-Simply execute the main entry point:
-
+#### Manual (CLI)
 ```bash
 python main.py
 ```
 
-*Note: On the first run, the system will automatically generate a synthetic machine learning model (`ml/model.pkl`) if one isn't present.*
-
 ---
 
-## 🏗️ System Architecture
+## 🧠 Technical Approach
 
-The project follows a modular design for easy extensibility:
+### Feature Extraction Pipe
+The system extracts skeletal data and converts it into a 12-dimensional feature vector every frame:
+1. **Coordinate Normalization**: Landmarks are scaled relative to the bounding box.
+2. **Velocity Calculation**: $V_y = \Delta Y / \Delta t$ of the hips and torso.
+3. **Angle Analysis**: Calculating joint angles at the hips and knees to detect "slump" or "collapse" patterns.
 
--   📂 **`main.py`**: Entry point that handles application initialization and layout.
--   📂 **`gui/`**: Contains the `main_window.py` and processing threads for non-blocking UI.
--   📂 **`vision/`**: MediaPipe wrapper classes for pose estimation.
--   📂 **`ml/`**: Model inference, training scripts, and serialization.
--   📂 **`utils/`**: Core mathematical utilities for skeleton feature extraction.
--   📂 **`logs/`**: Directory for automated session logging.
-
----
-
-## 🧠 How it Works
-
-1.  **Pose Detection**: MediaPipe extracts 3D coordinates for 33 key body landmarks.
-2.  **Normalization**: Landmark coordinates are normalized relative to the frame size.
-3.  **Feature Vector**: We calculate:
-    -   **Vertical Velocity**: Change in Y-coordinates of the center of mass.
-    -   **Body Aspect Ratio**: Ratio between bounding box width and height.
-    -   **Ground Proximity**: Distance of the hips/shoulders from the lower frame boundary.
-4.  **Inference**: A sliding window of these features is fed into the Random Forest model to predict the probability of a "Fall" state.
+### Classification Logic
+The Random Forest classifier analyzes a temporal window of 15-30 frames to differentiate between "sitting down quickly" and a "sudden fall".
 
 ---
 
 ## 📜 License
-
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
-*Developed as part of MINI_PROJECT_3.*
+<div align="center">
+  <sub>Developed with ❤️ for Advanced Healthcare Robotics and Monitoring.</sub>
+</div>
